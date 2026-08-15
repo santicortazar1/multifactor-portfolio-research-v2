@@ -1,38 +1,37 @@
 """
-## Centralized project configuration for the Multifactor Portfolio Research repository.
+Centralized project configuration for the Multifactor Portfolio Research
+repository.
 
-## Purpose
+This module is the single source of truth for repository-wide infrastructure,
+canonical data-source identifiers, and global analysis parameters approved in
+the research protocol.
 
-This module provides project-wide constants shared across notebooks and source
-modules. Centralizing configuration improves consistency, reproducibility, and
-maintainability by avoiding duplicated values throughout the codebase.
+Domain-specific configuration belongs in its corresponding source module.
+For example, portfolio definitions and portfolio-specific validation belong in
+src/portfolio/portfolio_definitions.py.
 
-## Current Scope
-
-- Project paths
-- Project metadata
-- Canonical data sources
-
-## Notes
-
-Analytical parameters (e.g., portfolio weights, transaction costs, or
-performance metrics) do NOT belong here. They should remain in the modules
-that implement the corresponding methodology.
+Analytical formulas and portfolio-simulation logic do not belong here.
+Methodological parameters must not be duplicated or silently overridden in
+notebooks or downstream modules.
 """
 
-## Section I - Imports
+# Section I — Imports
 
+from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
+from typing import Literal
 
 
-## Section II - Project Paths
+# Section II — Project Paths
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 DATA_DIR = PROJECT_ROOT / "data"
-
 RAW_DATA_DIR = DATA_DIR / "raw"
 PROCESSED_DATA_DIR = DATA_DIR / "processed"
+
+RAW_MARKET_DATA_FILE = RAW_DATA_DIR / "yahoo_market_data.parquet"
 
 NOTEBOOKS_DIR = PROJECT_ROOT / "notebooks"
 
@@ -44,12 +43,57 @@ REPORTS_DIR = OUTPUTS_DIR / "reports"
 SRC_DIR = PROJECT_ROOT / "src"
 
 
-## Section III - Supported Data Sources (Draft)
+# Section III — Canonical Data Sources
 
-# This section is reserved for canonical project data sources.
-# Only repository-wide source identifiers belong here—not analytical parameters.
-#
-# Possible future additions:
-# - Yahoo Finance
-# - FRED
-# - Kenneth French Data Library
+MARKET_DATA_PROVIDER = "Yahoo Finance"
+MARKET_DATA_FREQUENCY = "monthly"
+MARKET_PRICE_REQUIREMENT = "adjusted_total_return"
+MONTHLY_OBSERVATION_RULE = "last_available_trading_observation"
+
+FRED_PROVIDER = "Federal Reserve Economic Data"
+RISK_FREE_SERIES = "DGS3MO"
+MACRO_REGIME_SERIES = "T10Y3M"
+FRED_MONTHLY_OBSERVATION_RULE = "last_available_observation"
+
+
+# Section IV — Type Definitions
+
+@dataclass(frozen=True)
+class AnalysisConfig:
+    start_date: date
+    end_date: date
+    base_frequency: Literal["monthly"]
+
+
+# Section V — Analysis Configuration
+
+ANALYSIS_CONFIG = AnalysisConfig(
+    start_date=date(2013, 7, 1),
+    end_date=date(2024, 12, 31),
+    base_frequency="monthly",
+)
+
+
+# Section VI — Configuration Validation
+
+def validate_analysis_config(config: AnalysisConfig) -> None:
+    """Validate the frozen analysis-period configuration."""
+
+    if config.start_date >= config.end_date:
+        raise ValueError(
+            "Analysis start_date must be earlier than end_date."
+        )
+
+    if config.base_frequency != "monthly":
+        raise ValueError(
+            "The frozen empirical specification requires monthly frequency."
+        )
+
+
+def validate_configuration() -> None:
+    """Run all project-level configuration checks."""
+
+    validate_analysis_config(ANALYSIS_CONFIG)
+
+
+validate_configuration()
