@@ -32,3 +32,4 @@ def load_raw_market_data() -> pd.DataFrame:
     )
 
 
+save_raw_market_data(market_data)
