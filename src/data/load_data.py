@@ -31,5 +31,3 @@ def load_raw_market_data() -> pd.DataFrame:
         engine="pyarrow",
     )
 
-
-save_raw_market_data(market_data)
