@@ -32,6 +32,7 @@ RAW_DATA_DIR = DATA_DIR / "raw"
 PROCESSED_DATA_DIR = DATA_DIR / "processed"
 
 RAW_MARKET_DATA_FILE = RAW_DATA_DIR / "yahoo_market_data.parquet"
+RAW_MACRO_DATA_FILE = RAW_DATA_DIR / "fred_macro_data.parquet"
 
 NOTEBOOKS_DIR = PROJECT_ROOT / "notebooks"
 

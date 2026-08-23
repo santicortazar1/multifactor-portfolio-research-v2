@@ -1,3 +1,6 @@
 .venv/
 __pycache__/
 .DS_Store
+
+# Raw external data — reproducible through acquisition pipeline
+data/raw/*.parquet

@@ -11,7 +11,10 @@ missing-data treatment, portfolio construction, or analytical calculations.
 
 import pandas as pd
 
-from src.config import RAW_MARKET_DATA_FILE
+from src.config import (
+    RAW_MACRO_DATA_FILE,
+    RAW_MARKET_DATA_FILE,
+)
 
 
 # Section II — Raw Market Data
@@ -31,3 +34,20 @@ def load_raw_market_data() -> pd.DataFrame:
         engine="pyarrow",
     )
 
+
+# Section III — Raw Macroeconomic Data
+
+def load_raw_macro_data() -> pd.DataFrame:
+    """
+    Load the persisted raw FRED macroeconomic-data acquisition.
+    """
+
+    if not RAW_MACRO_DATA_FILE.exists():
+        raise FileNotFoundError(
+            f"Raw macro-data file not found: {RAW_MACRO_DATA_FILE}"
+        )
+
+    return pd.read_parquet(
+        RAW_MACRO_DATA_FILE,
+        engine="pyarrow",
+    )
