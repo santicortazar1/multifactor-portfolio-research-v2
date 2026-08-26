@@ -56,6 +56,14 @@ RISK_FREE_SERIES = "DGS3MO"
 MACRO_REGIME_SERIES = "T10Y3M"
 FRED_MONTHLY_OBSERVATION_RULE = "last_available_observation"
 
+ELIGIBLE_ETFS = (
+    "SPY",
+    "MTUM",
+    "USMV",
+    "QUAL",
+    "AGG",
+)
+
 
 # Section IV — Type Definitions
 

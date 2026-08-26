@@ -102,6 +102,9 @@ multifactor-portfolio-research/
 │   ├── raw/
 │   └── processed/
 │
+├── docs/
+│   ├── research_protocol.md
+│
 ├── notebooks/
 │   ├── 00_research_environment.ipynb
 │   ├── 01_data_engineering.ipynb
@@ -113,9 +116,12 @@ multifactor-portfolio-research/
 ├── src/
 │   ├── config.py
 │   ├── data.py
-│   ├── portfolios.py
+│   ├── analytics.py
+│   ├── macro.py
+│   ├── portfolio.py
 │   ├── metrics.py
 │   ├── robustness.py
+│   ├── utils.py
 │   └── visualization.py
 │
 ├── figures/

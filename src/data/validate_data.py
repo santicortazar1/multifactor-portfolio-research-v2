@@ -11,10 +11,100 @@ from dateutil.relativedelta import relativedelta
 
 from src.config import (
     ANALYSIS_CONFIG,
+    ELIGIBLE_ETFS,
     MACRO_REGIME_SERIES,
     RISK_FREE_SERIES,
 )
 
+
+# Section I — Raw Yahoo Market-Data Validation
+
+def validate_raw_market_data(
+    market_data: pd.DataFrame,
+) -> None:
+    """
+    Validate the raw Yahoo market-data dataset against the acquisition contract.
+    """
+
+    if market_data.empty:
+        raise ValueError("Raw Yahoo market-data dataset is empty.")
+
+    if not isinstance(market_data.index, pd.DatetimeIndex):
+        raise TypeError(
+            "Raw Yahoo market-data index must be a pandas DatetimeIndex."
+        )
+
+    if not isinstance(market_data.columns, pd.MultiIndex):
+        raise TypeError(
+            "Raw Yahoo market-data columns must be a pandas MultiIndex."
+        )
+
+    if not market_data.index.is_monotonic_increasing:
+        raise ValueError(
+            "Raw Yahoo market-data dates are not monotonically increasing."
+        )
+
+    if market_data.index.has_duplicates:
+        raise ValueError(
+            "Raw Yahoo market-data contains duplicate dates."
+        )
+
+    returned_tickers = set(
+        market_data.columns.get_level_values("Ticker")
+    )
+
+    missing_tickers = set(ELIGIBLE_ETFS).difference(returned_tickers)
+
+    if missing_tickers:
+        raise ValueError(
+            "Raw Yahoo market-data is missing required ticker(s): "
+            f"{sorted(missing_tickers)}"
+        )
+
+    coverage = {}
+
+    for ticker in ELIGIBLE_ETFS:
+        required_column = (ticker, "Close")
+
+        if required_column not in market_data.columns:
+            raise ValueError(
+                f"Raw Yahoo market-data is missing required Close field "
+                f"for ticker {ticker}."
+            )
+
+        close = market_data[required_column]
+
+        valid_count = close.notna().sum()
+        missing_count = close.isna().sum()
+        first_valid = close.first_valid_index()
+        last_valid = close.last_valid_index()
+
+        if valid_count == 0:
+            raise ValueError(
+                f"Raw Yahoo market-data contains no valid Close observations "
+                f"for required ticker {ticker}."
+            )
+
+        coverage[ticker] = {
+            "valid": valid_count,
+            "missing": missing_count,
+            "first": first_valid,
+            "last": last_valid,
+        }
+
+    print("Raw Yahoo structural validation PASS")
+    print()
+    print("Close coverage:")
+
+    for ticker, stats in coverage.items():
+        print(f"\n{ticker}")
+        print(f"  Valid observations:   {stats['valid']}")
+        print(f"  Missing observations: {stats['missing']}")
+        print(f"  First valid date:      {stats['first']}")
+        print(f"  Last valid date:       {stats['last']}")
+
+
+# Section II — Raw FRED Macro-Data Validation
 
 def validate_raw_macro_data(macro_data: pd.DataFrame) -> None:
     """
